@@ -6,7 +6,7 @@ export default function HomeLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="flex-1 mx-auto max-w-5xl w-full px-6 py-10">
+    <main className="flex-1 mx-auto max-w-6xl w-full px-6 py-8">
       {children}
     </main>
   );

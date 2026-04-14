@@ -55,7 +55,9 @@ export default function Create() {
                     placeholder="New Deck"
                   />
                   {errors.title && (
-                    <p className="text-sm text-red-500">{errors.title.message}</p>
+                    <p className="text-sm text-red-500">
+                      {errors.title.message}
+                    </p>
                   )}
                 </Field>
                 <Field>
@@ -79,7 +81,9 @@ export default function Create() {
                 type="button"
                 variant="secondary"
                 className="h-10 w-auto"
-                onClick={() => append({ front: "", back: "", gradingMode: "loose" })}
+                onClick={() =>
+                  append({ front: "", back: "", gradingMode: "loose" })
+                }
               >
                 Add a card
               </Button>
@@ -93,7 +97,7 @@ export default function Create() {
 
             <Field orientation="horizontal">
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : "Submit"}
+                {isSubmitting ? "Saving..." : "Save"}
               </Button>
             </Field>
           </FieldGroup>

@@ -1,66 +1,77 @@
 "use client";
 
-import { useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
   Field,
-  FieldContent,
-  FieldDescription,
-  FieldError,
   FieldGroup,
   FieldLabel,
-  FieldLegend,
   FieldSeparator,
   FieldSet,
-  FieldTitle,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import Card from "./Card";
+import { createDeckSchema, type CreateDeckInput } from "./schema";
+import { createDeck } from "./actions";
 
 export default function Create() {
-  const [cards, setCards] = useState([0, 1]);
+  const {
+    control,
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateDeckInput>({
+    resolver: zodResolver(createDeckSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      cards: [
+        { front: "", back: "", gradingMode: "loose" },
+        { front: "", back: "", gradingMode: "loose" },
+      ],
+    },
+  });
+
+  const { fields, append } = useFieldArray({ control, name: "cards" });
+
+  async function onSubmit(data: CreateDeckInput) {
+    await createDeck(data);
+  }
 
   return (
     <main className="flex-col">
       <h1 className="text-2xl font-bold mb-4">Create a New Deck</h1>
       <div className="w-full">
-        <form>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup>
             <FieldSet>
               <FieldGroup>
                 <Field className="min-w-full">
                   <FieldLabel>Deck Title</FieldLabel>
                   <Input
-                    className=""
+                    {...register("title")}
                     id="deck-title"
                     placeholder="New Deck"
-                    required
                   />
+                  {errors.title && (
+                    <p className="text-sm text-red-500">{errors.title.message}</p>
+                  )}
                 </Field>
                 <Field>
                   <FieldLabel>Deck Description</FieldLabel>
                   <Input
+                    {...register("description")}
                     id="deck-description"
                     placeholder="New Deck Description"
-                    required
                   />
                 </Field>
               </FieldGroup>
             </FieldSet>
             <FieldSeparator />
 
-            {cards.map((id) => (
-              <Card key={id} />
+            {fields.map((field, index) => (
+              <Card key={field.id} index={index} control={control} />
             ))}
 
             <div className="flex justify-center">
@@ -68,17 +79,22 @@ export default function Create() {
                 type="button"
                 variant="secondary"
                 className="h-10 w-auto"
-                onClick={() => setCards((prev) => [...prev, prev.length])}
+                onClick={() => append({ front: "", back: "", gradingMode: "loose" })}
               >
                 Add a card
               </Button>
             </div>
 
+            {errors.cards?.root && (
+              <p className="text-sm text-red-500 text-center">
+                {errors.cards.root.message}
+              </p>
+            )}
+
             <Field orientation="horizontal">
-              <Button type="submit">Submit</Button>
-              {/* <Button variant="outline" type="button">
-                Cancel
-              </Button> */}
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Saving..." : "Submit"}
+              </Button>
             </Field>
           </FieldGroup>
         </form>
